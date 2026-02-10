@@ -3,6 +3,7 @@
 The main idea of the model is to integrate the [FourierUnit](https://github.com/deng-ai-lab/SFHformer/blob/1f7994112b9ced9153edc7187e320e0383a9dfd3/models/SFHformer.py#L143) into the [GatedCNN](https://github.com/yuweihao/MambaOut/blob/main/models/mambaout.py#L119) pipeline in order to strengthen the model’s global perception with minimal computational overhead.
 
 The FourierUnit adds feature processing in the frequency domain, expanding the effective receptive field, while the GatedCNN provides efficient local modeling and control of information flow through a gating mechanism. Their combination allows merging global context and computational efficiency within a compact SISR architecture.
+
 ---
 # TODO:
 + [ ] Fix trt inference
