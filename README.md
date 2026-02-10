@@ -3,7 +3,9 @@
 The main idea of the model is to integrate the [FourierUnit](https://github.com/deng-ai-lab/SFHformer/blob/1f7994112b9ced9153edc7187e320e0383a9dfd3/models/SFHformer.py#L143) into the [GatedCNN](https://github.com/yuweihao/MambaOut/blob/main/models/mambaout.py#L119) pipeline in order to strengthen the model’s global perception with minimal computational overhead.
 
 The FourierUnit adds feature processing in the frequency domain, expanding the effective receptive field, while the GatedCNN provides efficient local modeling and control of information flow through a gating mechanism. Their combination allows merging global context and computational efficiency within a compact SISR architecture.
-
+---
+# TODO:
++ [ ] Fix trt inference
 ---
 
 ## Model structure:
@@ -54,21 +56,32 @@ The FourierUnit adds feature processing in the frequency domain, expanding the e
 
 To train, choose one of the frameworks and place the model file in the `archs` folder:
 
-* **[NeoSR](https://github.com/neosr-project/neosr)** — `fidsr_arcg.py` → `neosr/archs/fidsr_arcg.py`. [Config](configs/neosr.toml)
+* **[NeoSR](https://github.com/neosr-project/neosr)** — `fidsr_arch.py` → `neosr/archs/fidsr_arch.py`. [Config](configs/neosr.toml)
 
-  * Uncomment lines [14–17](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L14-L17), [687](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L687) and [698](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L698).
-  * Comment out line [696](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L696).
+  * Uncomment lines [14–17](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L14-L17), [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694) and [705](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L705).
+  * Comment out line [703](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L703).
 
-* **[traiNNer-redux](https://github.com/the-database/traiNNer-redux)** — `fidsr_arcg.py` → `traiNNer/archs/fidsr_arcg.py`. [Config](configs/trainner-redux.yml)
+* **[traiNNer-redux](https://github.com/the-database/traiNNer-redux)** — `fidsr_arch.py` → `traiNNer/archs/fidsr_arch.py`. [Config](configs/trainner-redux.yml)
 
-  * Uncomment lines [11](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L11) and [687](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L687).
+  * Uncomment lines [11](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L11) and [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694).
 
-* **[BasicSR](https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs)** — `fidsr_arcg.py` → `basicsr/archs/fidsr_arcg.py`. [Config](configs/basicsr.yml)
+* **[BasicSR](https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs)** — `fidsr_arch.py` → `basicsr/archs/fidsr_arch.py`. [Config](configs/basicsr.yml)
 
-  * Uncomment lines [19](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L19) and [687](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L687).
+  * Uncomment lines [19](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L19) and [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694).
 
 ---
 
 ## Inference:
-
-TODO
+### Resselt install
+```shell
+uv venv  --python=3.12
+source .venv/bin/activate
+uv pip install "resselt==1.3.1" "pepeline==1.2.3"
+```
+### main.py
+```shell
+ python main.py --input_dir urban/x4 --output_dir urban/x4_scale --weights fidsr_x4.pth
+```
+---
+## Contacts:
+[discord](https://discord.gg/xwZfWWMwBq)

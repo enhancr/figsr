@@ -661,7 +661,12 @@ class InceptionConv2d(nn.Module):
 
 class GatedCNNBlock(nn.Module):
     def __init__(
-        self, dim: int = 64, expansion_ratio: float = 8 / 3, gc: int = 8
+        self,
+        dim: int = 64,
+        expansion_ratio: float = 8 / 3,
+        gc: int = 8,
+        square_kernel_size: int = 13,
+        band_kernel_size: int = 17,
     ) -> None:
         super().__init__()
         hidden = int(expansion_ratio * dim) // 8 * 8
@@ -669,7 +674,9 @@ class GatedCNNBlock(nn.Module):
         self.fc1 = nn.Conv2d(dim, hidden * 2, 3, 1, 1)
         self.act = nn.SiLU()
         self.split_indices = [hidden, hidden - dim, dim - gc * 3, gc, gc, gc]
-        self.conv = InceptionConv2d(dim - gc * 3, gc)
+        self.conv = InceptionConv2d(
+            dim - gc * 3, gc, square_kernel_size, band_kernel_size
+        )
         self.fc2 = nn.Conv2d(hidden, dim, 3, 1, 1)
 
     def gated_forward(self, x: Tensor) -> Tensor:
@@ -701,6 +708,8 @@ class FIGSR(nn.Module):
         mid_dim: int = 32,
         n_blocks: int = 24,
         gc: int = 8,
+        square_kernel_size: int = 13,
+        band_kernel_size: int = 17,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -708,13 +717,17 @@ class FIGSR(nn.Module):
         self.pad = 2
         self.gfisr_body_half = nn.Sequential(
             *[
-                GatedCNNBlock(dim, expansion_ratio=expansion_ratio, gc=gc)
+                GatedCNNBlock(
+                    dim, expansion_ratio, gc, square_kernel_size, band_kernel_size
+                )
                 for _ in range(n_blocks // 2)
             ]
         )
         self.gfisr_body_half_2 = nn.Sequential(
             *[
-                GatedCNNBlock(dim, expansion_ratio=expansion_ratio, gc=gc)
+                GatedCNNBlock(
+                    dim, expansion_ratio, gc, square_kernel_size, band_kernel_size
+                )
                 for _ in range(n_blocks - n_blocks // 2)
             ]
             + [nn.Conv2d(dim, dim, 3, 1, 1)]
