@@ -18,7 +18,8 @@ The FourierUnit adds feature processing in the frequency domain, expanding the e
 
 ### figsr
 
-<img src="figs/figsr.png" width="600"/>
+
+<img src="figs/FIGSR.png" width="600"/>
 
 ### GDB FU
 
