@@ -8,12 +8,17 @@ The FourierUnit adds feature processing in the frequency domain, expanding the e
 # TODO:
 + [ ] Fix trt inference
 ---
+## Showcase:
+[show pics](https://slow.pics/s/fPvcS3P0?image-fit=contain) 
 
+[gdrive](https://drive.google.com/drive/u/1/folders/1ofJo5CCgrOtLdVm9psmlJv15Z3aP4Aiz)
+
+---
 ## Model structure:
 
-### FIDSR
+### figsr
 
-<img src="figs/FIDSR.png" width="600"/>
+<img src="figs/figsr.png" width="600"/>
 
 ### GDB FU
 
@@ -45,28 +50,44 @@ The FourierUnit adds feature processing in the frequency domain, expanding the e
 ---
 
 ## Metrics:
-
-| Model name | Params | Latency | Train dataset | urban100       | set14          | BHI100 | PSISRD_val125 | 
-|------------| ------ |---------|---------------| -------------- | -------------- | ------ | ------------- | 
-| ESRGAN     | ~16.5m |         | DF2K          | 27.03 / 0.8153 | 28.99 / 0.7917 |        |               |
-| FIGSR      | ~4.4m  |         | BHI           | 27.11 / 0.8146 |                |        |               |
+* Metrics were computed using [PyIQA](https://github.com/chaofengc/IQA-PyTorch/tree/main), except for those starting with “bs”, which were calculated using BasicSR.
+### [Esrgan DF2K](https://drive.google.com/file/d/1mSJ6Z40weL-dnPvi390xDd3uZBCFMeqr/view?usp=sharing):
+| Dataset       | SSIM-Y | PSNR-Y | TOPIQ  | bs_ssim_y | bs_psnr_y |
+| ------------- | ------ | ------ | ------ | --------- | --------- |
+| BHI100        | 0.7150 | 22.84  | 0.5694 | 0.7279    | 24.1636   |
+| psisrd_val125 | 0.7881 | 27.01  | 0.6043 | 0.8034    | 28.3273   |
+| set14         | 0.7730 | 27.67  | 0.6905 | 0.7915    | 28.9969   |
+| urban100      | 0.8025 | 25.71  | 0.6701 | 0.8152    | 27.0282   |
+### [FIGSR BHI](https://github.com/enhancr/figsr/releases/tag/v1.0.0):
+| Dataset       | SSIM-Y | PSNR-Y | TOPIQ  | bs_ssim_y | bs_psnr_y |
+| ------------- | ------ | ------ | ------ | --------- | --------- |
+| BHI100        | 0.7196 | 22.83  | 0.5723 | 0.7327    | 24.1549   |
+| psisrd_val125 | 0.7911 | 26.97  | 0.6095 | 0.8065    | 28.2946   |
+| set14         | 0.7769 | 27.70  | 0.7036 | 0.7952    | 29.0221   |
+| urban100      | 0.8056 | 25.80  | 0.6725 | 0.8185    | 27.1170   |
 
 ---
+
+## Performance 3060 12gb:
+| Model  | input_size | params ↓ | avg_inference ↓ | fps ↑              | memory_use ↓ |
+|--------| ---------- | -------- |-----------------| ------------------ | ------------ |
+| ESRGAN | 1024x1024  | ~16.6m   | ~2.8s           | 0.3483220866736526 | 8.29GB       |
+| FIGSR  | 1024x1024  | ~4.4m    | ~1.64s          | 0.6081749253740837 | 2.26GB       |
 
 ## Training
 
 To train, choose one of the frameworks and place the model file in the `archs` folder:
 
-* **[NeoSR](https://github.com/neosr-project/neosr)** — `fidsr_arch.py` → `neosr/archs/fidsr_arch.py`. [Config](configs/neosr.toml)
+* **[NeoSR](https://github.com/neosr-project/neosr)** — `figsr_arch.py` → `neosr/archs/figsr_arch.py`. [Config](configs/neosr.toml)
 
   * Uncomment lines [14–17](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L14-L17), [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694) and [705](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L705).
   * Comment out line [703](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L703).
 
-* **[traiNNer-redux](https://github.com/the-database/traiNNer-redux)** — `fidsr_arch.py` → `traiNNer/archs/fidsr_arch.py`. [Config](configs/trainner-redux.yml)
+* **[traiNNer-redux](https://github.com/the-database/traiNNer-redux)** — `figsr_arch.py` → `traiNNer/archs/figsr_arch.py`. [Config](configs/trainner-redux.yml)
 
   * Uncomment lines [11](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L11) and [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694).
 
-* **[BasicSR](https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs)** — `fidsr_arch.py` → `basicsr/archs/fidsr_arch.py`. [Config](configs/basicsr.yml)
+* **[BasicSR](https://github.com/XPixelGroup/BasicSR/tree/master/basicsr/archs)** — `figsr_arch.py` → `basicsr/archs/figsr_arch.py`. [Config](configs/basicsr.yml)
 
   * Uncomment lines [19](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L19) and [694](https://github.com/enhancr/figsr/blob/main/figsr_arch.py#L694).
 
@@ -81,7 +102,7 @@ uv pip install "resselt==1.3.1" "pepeline==1.2.3"
 ```
 ### main.py
 ```shell
- python main.py --input_dir urban/x4 --output_dir urban/x4_scale --weights fidsr_x4.pth
+ python main.py --input_dir urban/x4 --output_dir urban/x4_scale --weights  4x_FIGSR.safetensors 
 ```
 ---
 ## Contacts:
