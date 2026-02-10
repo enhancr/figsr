@@ -1,0 +1,78 @@
+
+name = "4x_figsr"
+model_type = "image"
+scale = 4
+use_amp = true
+bfloat16 = false
+fast_matmul = false
+#compile = true
+manual_seed = 1024
+
+[datasets.train]
+type = "paired"
+dataroot_gt = 'datasets/BHI'
+dataroot_lq = 'datasets/BHI_lq'
+patch_size = 64
+batch_size = 64
+#accumulate = 1
+
+[datasets.val]
+name = "val"
+type = "paired"
+dataroot_gt = 'C:\datasets\val\gt\'
+dataroot_lq = 'C:\datasets\val\lq\'
+[val]
+val_freq = 5000
+#tile = 200
+[val.metrics.psnr]
+type = "calculate_psnr"
+[val.metrics.ssim]
+type = "calculate_ssim"
+#[val.metrics.dists]
+#type = "calculate_dists"
+#better = "lower"
+#[val.metrics.topiq]
+#type = "calculate_topiq"
+
+[path]
+#pretrain_network_g = 'experiments\pretrain_g.pth'
+#pretrain_network_d = 'experiments\pretrain_d.pth'
+
+[network_g]
+type = "FIGSR"
+
+
+[train]
+grad_clip = false
+ema = 0.999
+wavelet_guided = false
+#wavelet_init = 80000
+#sam = "fsam"
+#sam_init = 1000
+#eco = true
+#eco_init = 15000
+#match_lq_colors = true
+
+[train.optim_g]
+type = "adamw"
+lr = 5e-4
+betas = [0.9, 0.99]
+weight_decay = 0.01
+
+[train.scheduler]
+type = "multisteplr"
+milestones = [200000,400000,600000,800000]
+gamma = 0.5
+
+
+#  losses
+[train.mssim_opt]
+type = "huber_loss"
+loss_weight = 1.0
+
+[logger]
+total_iter = 1000000
+save_checkpoint_freq = 5000
+use_tb_logger = true
+#save_tb_img = true
+#print_freq = 100
