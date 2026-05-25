@@ -616,10 +616,10 @@ class FourierUnit(nn.Module):
         # traffic and lower peak VRAM. Math-equivalent; the fp32 inference path is
         # bit-identical, the fp16 path differs only by running the convs in fp32
         # (strictly more accurate, well within fp16 noise).
-        with torch.autocast("cuda", enabled=False):
+        with torch.autocast(x.device.type, enabled=False):
             x = x.float()
             ffted = self.rfft2(x)
-            ffted = ffted.permute(0, 4, 1, 2, 3).reshape(b, c * 2, h, -1)
+            ffted = ffted.permute(0, 4, 1, 2, 3).contiguous().view(b, c * 2, h, -1)
             ffted = self.rn(ffted)
             ffted = self.fpe(ffted) + ffted
             ffted = self.fdc(ffted)
