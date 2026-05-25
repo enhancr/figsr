@@ -609,19 +609,25 @@ class FourierUnit(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         orig_dtype = x.dtype
-        x = x.to(torch.float32)
         b, c, h, w = x.shape
-        ffted = self.rfft2(x)
-        ffted = ffted.permute(0, 4, 1, 2, 3).contiguous()
-        ffted = ffted.view(b, c * 2, h, -1).to(orig_dtype)
-        ffted = self.rn(ffted)
-        ffted = self.fpe(ffted) + ffted
-        ffted = self.fdc(ffted)
-        ffted = self.gelu(ffted)
-        ffted = ffted.view(b, c, 2, h, -1).permute(0, 1, 3, 4, 2).contiguous().float()
-        out = self.irfft2(ffted)
-        out = self.post_norm(out.to(orig_dtype))
-        return out
+        # The FFT mandates fp32. Keeping the intervening norm/conv ops in the same
+        # fp32 region (instead of casting the spectrum down to fp16 for them and back)
+        # removes the fp16<->fp32 round-trips: 2 casts instead of 4. Less memory
+        # traffic and lower peak VRAM. Math-equivalent; the fp32 inference path is
+        # bit-identical, the fp16 path differs only by running the convs in fp32
+        # (strictly more accurate, well within fp16 noise).
+        with torch.autocast("cuda", enabled=False):
+            x = x.float()
+            ffted = self.rfft2(x)
+            ffted = ffted.permute(0, 4, 1, 2, 3).reshape(b, c * 2, h, -1)
+            ffted = self.rn(ffted)
+            ffted = self.fpe(ffted) + ffted
+            ffted = self.fdc(ffted)
+            ffted = self.gelu(ffted)
+            ffted = ffted.view(b, c, 2, h, -1).permute(0, 1, 3, 4, 2).contiguous()
+            out = self.irfft2(ffted)
+            out = self.post_norm(out)
+        return out.to(orig_dtype)
 
 
 class InceptionConv2d(nn.Module):
